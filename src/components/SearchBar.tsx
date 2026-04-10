@@ -16,6 +16,9 @@ type SearchBarProps = {
 //
 // 1. (1 pt) Identifier le bug sur le filtre genre :
 //    pourquoi le <select> ne réagit-il pas ?
+//    genre est déclaré comme une variable locale, pa un état React.
+//    Quand onChange modifie genre, le composant ne re-render pas, donc value={genre}
+//    reste toujour "" et le select est bloqué.
 //
 // 2. (2 pts) Corriger le filtre genre en suivant le même
 //    pattern que le champ de recherche (qui fonctionne)
@@ -26,7 +29,7 @@ type SearchBarProps = {
 
 export const SearchBar = ({ onSearch, onGenreChange }: SearchBarProps) => {
   const [search, setSearch] = useState("");
-  let genre = "";
+  const [genre, setGenre] = useState("");
 
   return (
     <div className="flex gap-4 mb-6">
@@ -44,8 +47,9 @@ export const SearchBar = ({ onSearch, onGenreChange }: SearchBarProps) => {
       <select
         value={genre}
         onChange={(e) => {
-          genre = e.target.value;
-          onGenreChange(genre);
+          const value = e.target.value;
+          setGenre(value);
+          onGenreChange(value);
         }}
         className="px-4 py-2 border rounded-lg"
       >
