@@ -37,5 +37,51 @@ import type { Movie } from "../types/movie";
 //
 
 export const MovieDetailPage = () => {
-  return <div>TODO : compléter cette page</div>;
+  const { id } = useParams();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["movie", id],
+    queryFn: async () => {
+      return await api.get<Movie>(`/movies/${id}`);
+    },
+  });
+
+  const queryClient = useQueryClient();
+  const toggleWatchedMutation = useMutation({
+    mutationFn: async () => {
+      await api.post(`/movies/${id}/toggle-watched`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["movie", id] });
+    },
+  });
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      {isLoading && <p>Chargement...</p>}
+      {error && <p>Erreur : {error.message}</p>}
+      {data && (
+        <>
+          <img
+            src={data.imageUrl}
+            alt={data.title}
+            className="w-full h-64 object-cover rounded-lg"
+          />
+          <h1 className="text-3xl font-bold mt-4">{data.title}</h1>
+          <h2 className="text-gray-600 mt-1">
+            {data.director} - {data.year} - {data.genre}
+          </h2>
+          <p className="text-gray-700 mt-4">{data.description}</p>
+          <button
+            className={`mt-4 px-4 py-2 rounded-lg text-white ${
+              data.watched ? "bg-gray-500" : "bg-green-600"
+            }`}
+            onClick={() => toggleWatchedMutation.mutate()}
+          >
+            {data.watched ? "Marquer comme non vu" : "Marquer comme vu"}
+          </button>
+        </>
+      )}
+    </div>
+  );
 };
